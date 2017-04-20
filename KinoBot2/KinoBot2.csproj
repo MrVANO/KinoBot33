@@ -120,6 +120,7 @@
     <Compile Include="Forms\ChooseFilmForm.cs" />
     <Compile Include="Forms\ChooseMovieFormatForm.cs" />
     <Compile Include="Forms\ChooseMovieTime.cs" />
+    <Compile Include="Forms\ChooseOptionForm.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -151,7 +152,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>3979</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

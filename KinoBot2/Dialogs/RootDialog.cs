@@ -32,11 +32,16 @@ namespace KinoBot2.Dialogs
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
         {
-            JsonParser jp = new JsonParser();
             var activity = await result as Activity;
-            StringBuilder sb = new StringBuilder();
+            context.Call(ChooseOptionForm.BuildOptionsDialog(FormOptions.PromptInStart), OptionsComplete);
+        }
 
-            if (activity.Text.Contains("Фильмы на неделе"))
+        private async Task OptionsComplete(IDialogContext context, IAwaitable<ChooseOptionForm> result)
+        {
+            JsonParser jp = new JsonParser();
+            var form = await result;
+
+            if (form.actionOptions==Options.ФильмыНаНеделе)
             {
                 
                 List<WeekResponse> weekResponse = jp.getWeekResponse();
@@ -44,13 +49,12 @@ namespace KinoBot2.Dialogs
                 List<HallsResponse> hallsResponse = jp.getHallsResponse();
                 
                 completeWeekResponse = t.uniteResponses(weekResponse, moviesResponse, hallsResponse);
-                ChooseFilmForm.username = activity.From.Name;
                 ChooseFilmForm.moviesList = t.getAllMovies(completeWeekResponse);
                 context.Call(ChooseFilmForm.BuildMoviesDialog(FormOptions.PromptInStart), FormComplete);
             }
             else
             {
-                await context.PostAsync("Дорогой(ая) "+activity.From.Name+"! Такой команды в моем списке нет. Напишите 'Фильмы на неделе', чтобы получить список фильмов");
+                await context.PostAsync("Такой команды в моем списке нет. Напишите 'Фильмы на неделе', чтобы получить список фильмов");
             }
             
 
@@ -76,7 +80,7 @@ namespace KinoBot2.Dialogs
             }
             catch (OperationCanceledException)
             {
-                await context.PostAsync(BACK_OPERATION_TEXT);
+                context.Call(ChooseOptionForm.BuildOptionsDialog(FormOptions.PromptInStart), OptionsComplete);
             }
 
             //context.Wait(MessageReceivedAsync);
@@ -102,7 +106,7 @@ namespace KinoBot2.Dialogs
             }
             catch (OperationCanceledException)
             {
-                await context.PostAsync(BACK_OPERATION_TEXT);
+                context.Call(ChooseOptionForm.BuildOptionsDialog(FormOptions.PromptInStart), OptionsComplete);
             }
 
         }
@@ -128,7 +132,7 @@ namespace KinoBot2.Dialogs
             }
             catch (OperationCanceledException)
             {
-                await context.PostAsync(BACK_OPERATION_TEXT);
+                context.Call(ChooseOptionForm.BuildOptionsDialog(FormOptions.PromptInStart), OptionsComplete);
             }
 
             
@@ -143,7 +147,6 @@ namespace KinoBot2.Dialogs
                 {
                     string link = t.getSeanse(completeWeekResponse, movieName, movieDate, form.Time);
                     await context.PostAsync(link);
-
                 }
                 else
                 {
@@ -152,7 +155,7 @@ namespace KinoBot2.Dialogs
             }
             catch (OperationCanceledException)
             {
-                await context.PostAsync(BACK_OPERATION_TEXT);
+                context.Call(ChooseOptionForm.BuildOptionsDialog(FormOptions.PromptInStart), OptionsComplete);
             }
 
             context.Wait(MessageReceivedAsync);

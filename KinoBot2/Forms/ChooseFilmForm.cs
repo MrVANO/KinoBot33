@@ -15,14 +15,16 @@ namespace KinoBot2.Forms
         public static string username { get; set; }
 
         [Prompt("{||}")]
+        //[Template(TemplateUsage.Feedback, "Сейчас покажу даты показа")]
+        [Template(TemplateUsage.NotUnderstood, "Вы ввели значение, которого нет в списке выше")]
         public string MovieName { get; set; }
 
         public static IForm<ChooseFilmForm> BuildMoviesForm()
         {
-
-            return new FormBuilder<ChooseFilmForm>()
-                    .Message(username+ ", вот фильмы идущие на этой неделе:")
-                    .Field(new FieldReflector<ChooseFilmForm>(nameof(MovieName))
+            IFormBuilder<ChooseFilmForm> builder = new FormBuilder<ChooseFilmForm>()
+                    .Message("Вот фильмы идущие на этой неделе:")
+                    .Field(new FieldReflector<ChooseFilmForm>(nameof(MovieName)
+                    )
                             .SetType(null)
                             .SetDefine((state, field) =>
                             {
@@ -32,9 +34,41 @@ namespace KinoBot2.Forms
                                         .AddTerms(prod, prod);
 
                                 return Task.FromResult(true);
-                            }))
-                    .AddRemainingFields()
-                    .Build();
+                            })
+                            .SetActive((state) =>
+                            {
+                                string s = state.MovieName;
+                                return true;
+                            })
+                            .SetNext((value, state) =>
+                            {
+                                var nextStep = new NextStep();
+                                return nextStep;
+                            })
+                            .SetValidate(
+                                validate: async (state, response) =>
+                                {
+                                    var result = new ValidateResult { IsValid = false, Value = response };
+                                    var movie = (response as string);
+                                    foreach (var movieName in GetMovies())
+                                    {
+                                        if (movie.Contains(movieName))
+                                        {
+                                            result.Feedback = "Запрос корректен";
+                                            result.IsValid = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!result.IsValid)
+                                    {
+                                        result.Feedback = username + ", вы ввели что-то не то!!!";
+                                    }
+                                    return result;
+                                })
+                            )
+                    .AddRemainingFields();
+
+            return builder.Build(); 
         }
 
         public static IFormDialog<ChooseFilmForm> BuildMoviesDialog(FormOptions options = FormOptions.PromptInStart)
