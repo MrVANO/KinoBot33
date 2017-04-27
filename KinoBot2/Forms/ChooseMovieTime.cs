@@ -14,6 +14,7 @@ namespace KinoBot2.Forms
         public static List<string> timesList = new List<string>();
 
         [Prompt("Сеансы {||}")]
+        [Template(TemplateUsage.NotUnderstood, "Вы ввели значение \"{0}\", которого нет на последней форме. Выберите значение из последней формы.")]
         public string Time { get; set; }
 
         public static IForm<ChooseMovieTime> BuildDatesForm()
@@ -28,9 +29,38 @@ namespace KinoBot2.Forms
                                     field
                                         .AddDescription(prod, prod)
                                         .AddTerms(prod, prod);
-
+                                var exit = "Выход";
+                                field.AddDescription(exit, exit).AddTerms(exit, exit);
                                 return Task.FromResult(true);
-                            }))
+                            })
+                            .SetValidate(
+                                validate: async (state, response) =>
+                                {
+                                    var result = new ValidateResult { IsValid = false, Value = response };
+                                    var movie = (response as string);
+                                    foreach (var movieName in GetTimes())
+                                    {
+                                        if (movie.Contains(movieName))
+                                        {
+                                            result.Feedback = "Запрос корректен";
+                                            result.IsValid = true;
+                                            break;
+                                        }
+                                        if (movie.Contains("Выход"))
+                                        {
+                                            result.Feedback = "Произвожу выход...";
+                                            result.IsValid = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!result.IsValid)
+                                    {
+                                        result.Feedback = "Случилась непредвиденная ошибка!!! Производится выход";
+                                        throw new OperationCanceledException();
+                                    }
+                                    return result;
+                                })
+                            )
                     .AddRemainingFields()
                     .Build();
         }
@@ -45,5 +75,6 @@ namespace KinoBot2.Forms
         {
             return timesList;
         }
+
     }
 }

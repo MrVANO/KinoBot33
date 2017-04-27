@@ -111,7 +111,7 @@ namespace KinoBot2.Parsers
                 {
                     result = "Ссылка на форму покупки билетов: \n\r" +
                         "http://kinohod.ru/widget/seances/" + wr.id + "\n\r" +
-                        "Напишите 'Фильмы на неделе', чтобы получить список фильмов";
+                        "Обратитесь к Киноботу, чтобы начать заново";
                 }
             }
             return result;

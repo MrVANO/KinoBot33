@@ -69,6 +69,7 @@ namespace KinoBot2.Dialogs
                 var form = await result;
                 if (form != null)
                 {
+                    exitFromForm(context);
                     movieName = form.MovieName;
                     ChooseDateForm.datesList = t.getMovieDates(completeWeekResponse, movieName);
                     context.Call(ChooseDateForm.BuildDatesDialog(FormOptions.PromptInStart), DatesFormComplete);
@@ -93,6 +94,7 @@ namespace KinoBot2.Dialogs
                 var form = await result;
                 if (form != null)
                 {
+                    exitFromForm(context);
                     movieDate = form.Date;
                     map = t.getMovieTimes(completeWeekResponse, movieName, movieDate);
                     ChooseMovieFormatForm.formatList = map.Keys.ToList();
@@ -118,6 +120,7 @@ namespace KinoBot2.Dialogs
                 var form = await result;
                 if (form != null)
                 {
+                    exitFromForm(context);
                     movieFormat = form.Format;
                     List<string> movieTimes = new List<string>();
                     map.TryGetValue(movieFormat, out movieTimes);
@@ -145,6 +148,7 @@ namespace KinoBot2.Dialogs
                 var form = await result;
                 if (form != null)
                 {
+                    exitFromForm(context);
                     string link = t.getSeanse(completeWeekResponse, movieName, movieDate, form.Time);
                     await context.PostAsync(link);
                 }
@@ -158,7 +162,17 @@ namespace KinoBot2.Dialogs
                 context.Call(ChooseOptionForm.BuildOptionsDialog(FormOptions.PromptInStart), OptionsComplete);
             }
 
-            context.Wait(MessageReceivedAsync);
+            //context.Wait(MessageReceivedAsync);
         }
+
+        private void exitFromForm(IDialogContext context)
+        {
+            var message = context.Activity.AsMessageActivity().Text;
+            if (message.Contains("Выход"))
+            {
+                throw new OperationCanceledException();
+            }
+        }
+
     }
 }

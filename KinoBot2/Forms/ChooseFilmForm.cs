@@ -16,7 +16,7 @@ namespace KinoBot2.Forms
 
         [Prompt("{||}")]
         //[Template(TemplateUsage.Feedback, "Сейчас покажу даты показа")]
-        [Template(TemplateUsage.NotUnderstood, "Вы ввели значение, которого нет в списке выше")]
+        [Template(TemplateUsage.NotUnderstood, "Вы ввели значение \"{0}\", которого нет на последней форме")]
         public string MovieName { get; set; }
 
         public static IForm<ChooseFilmForm> BuildMoviesForm()
@@ -32,7 +32,8 @@ namespace KinoBot2.Forms
                                     field
                                         .AddDescription(prod, prod)
                                         .AddTerms(prod, prod);
-
+                                var exit = "Выход";
+                                field.AddDescription(exit, exit).AddTerms(exit, exit);
                                 return Task.FromResult(true);
                             })
                             .SetActive((state) =>
@@ -58,10 +59,16 @@ namespace KinoBot2.Forms
                                             result.IsValid = true;
                                             break;
                                         }
+                                        if (movie.Contains("Выход")){
+                                            result.Feedback = "Произвожу выход...";
+                                            result.IsValid = true;
+                                            break;
+                                        }
                                     }
                                     if (!result.IsValid)
                                     {
-                                        result.Feedback = username + ", вы ввели что-то не то!!!";
+                                        result.Feedback = "Случилась непредвиденная ошибка!!! Производится выход";
+                                        throw new OperationCanceledException();
                                     }
                                     return result;
                                 })
